@@ -17,8 +17,7 @@
         /* Apply Sarabun as the primary font */
         body {
             font-family: 'Sarabun', 'Inter', sans-serif;
-            /* MODIFIED: Reverted to overflow: hidden */
-            overflow: hidden; 
+            overflow: hidden; /* Prevent scrolling when modal is open */
         }
         
         /* Style for the active tab */
@@ -27,107 +26,9 @@
             color: #2563eb; /* blue-600 */
             font-weight: 500;
         }
-
-        /* --- MODIFIED: CSS for Sticky Header/Column Fix --- */
-        #visual-individual table {
-            border-collapse: collapse;
-            /* width: 100%; REMOVED to allow horizontal scroll */
-        }
-        #visual-individual th, 
-        #visual-individual td {
-            border: 1px solid #e5e7eb; /* gray-200 */
-            padding: 6px 8px;
-            text-align: center;
-            font-size: 0.875rem; /* text-sm */
-            white-space: nowrap;
-        }
-        
-        /* --- Header Row --- */
-        #visual-individual th {
-            background-color: #f9fafb; /* gray-50 */
-            font-weight: 600; /* semibold */
-            position: sticky;
-            top: 0;
-            z-index: 2; /* Header row cells = 2 */
-        }
-        
-        /* --- Data Cells (for background) --- */
-        #visual-individual td {
-            background-color: #ffffff; /* white */
-        }
-
-        /* --- Sticky Column (Data) --- */
-        #visual-individual td:first-child {
-            text-align: left;
-            position: sticky;
-            left: 0;
-            min-width: 180px;
-            z-index: 1; /* Sticky column cells = 1 (LOWER) */
-        }
-
-        /* --- Sticky Corner (Header) --- */
-        #visual-individual th:first-child {
-            text-align: left;
-            position: sticky;
-            left: 0;
-            top: 0; 
-            min-width: 180px;
-            z-index: 3; /* Corner cell = 3 (HIGHEST) */
-            background-color: #f9fafb; 
-        }
-
-        /* --- Background Colors --- */
-        #visual-individual tr:nth-child(even) td {
-            background-color: #f9fafb; /* gray-50 */
-        }
-        #visual-individual tr:nth-child(odd) td {
-             background-color: #ffffff; /* white */
-        }
-        /* Ensure sticky column bg matches row */
-        #visual-individual tr:nth-child(even) td:first-child {
-            background-color: #f9fafb; /* gray-50 */
-        }
-        #visual-individual tr:nth-child(odd) td:first-child {
-            background-color: #ffffff; /* white */
-        }
-        /* --- End Background Colors --- */
-
-
-        /* --- NEW: Add row hover and highlight --- */
-        #visual-individual tbody tr {
-            cursor: pointer;
-        }
-        /* Hover fix */
-        #visual-individual tbody tr:hover td {
-             background-color: #f3f4f6; /* gray-100 */
-        }
-        #visual-individual tbody tr:hover td:first-child {
-             background-color: #f3f4f6; /* gray-100 */
-        }
-
-        #visual-individual tbody tr.row-highlight td {
-            background-color: #fef9c3; /* yellow-100 */
-        }
-        #visual-individual tbody tr.row-highlight td:first-child {
-            background-color: #fef9c3; /* yellow-100 */
-        }
-        /* --- End New Styles --- */
-
-        /* --- NEW: Style for danger text --- */
-        .text-danger {
-            color: #ef4444; /* red-500 */
-            font-weight: 600; /* semibold */
-        }
-        /* --- NEW: Add border after Rank --- */
-        #visual-individual th:nth-child(4),
-        #visual-individual td:nth-child(4) {
-            border-left: 2px solid #9ca3af; /* gray-400 */
-        }
-        /* --- End New Styles --- */
-
     </style>
 </head>
-<body class="bg-gray-100 h-screen overflow-hidden p-4">
+<body class="bg-gray-100 h-screen overflow-y-auto p-4">
 
     <!-- Admin Button -->
     <button id="admin-btn" class="fixed top-4 right-4 bg-gray-700 hover:bg-gray-800 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200 text-sm shadow z-50">
@@ -205,80 +106,73 @@
 
 
     <!-- ======== Main App (Hidden by default) ======== -->
-    <!-- MODIFIED: h-full flex flex-col -->
-    <div id="main-app" class="hidden bg-white rounded-xl shadow-2xl p-6 md:p-8 w-full max-w-6xl mx-auto h-full flex flex-col">
+    <div id="main-app" class="hidden bg-white rounded-xl shadow-2xl p-6 md:p-8 w-full max-w-6xl mx-auto">
         
-        <!-- === NON-SCROLLING HEADER === -->
-        <div>
-            <!-- Header and Sort Button Container -->
-            <div class="flex justify-between items-center mb-5">
-                <h1 class="text-2xl font-bold text-gray-800 text-left">
-                    ระบบดึงข้อมูล ปพ.5 (รร.บ้านโคกเมือง)
-                </h1>
-                <div class="flex items-center space-x-2">
-                    <span id="welcome-message" class="text-sm text-gray-600 font-medium self-center mr-2"></span>
-                    <button id="reset-data-btn" class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200 text-sm shadow">
-                        ล้างข้อมูล
-                    </button>
-                    <button id="logout-btn" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200 text-sm shadow">
-                        ออกจากระบบ
-                    </button>
-                </div>
-            </div>
-
-
-            <!-- File Input -->
-            <div class="mb-6">
-                <label for="file-upload" class="block text-sm font-medium text-gray-700 mb-2">
-                    อัปโหลดไฟล์ .xlsx (เลือกหลายไฟล์ได้):
-                </label>
-                <input type="file" id="file-upload" accept=".xlsx, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" 
-                       class="block w-full text-sm text-gray-600 rounded-lg border border-gray-300 cursor-pointer
-                              file:mr-4 file:py-2.5 file:px-5
-                              file:rounded-l-lg file:border-0
-                              file:text-sm file:font-semibold
-                              file:bg-blue-50 file:text-blue-700
-                              hover:file:bg-blue-100 transition-colors duration-200
-                              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                       multiple>
-            </div>
-
-            <!-- Progress Status Text -->
-            <div id="progress-status" class="hidden text-sm font-medium text-gray-700 mb-2 text-center">
-                กำลังประมวลผล...
-            </div>
-            <!-- Progress Bar -->
-            <div id="progress-container" class="hidden w-full bg-gray-200 rounded-full h-4 mb-4">
-                <div id="progress-bar" class="bg-blue-600 h-4 rounded-full text-xs font-medium text-blue-100 text-center p-0.5 leading-none transition-all duration-300 ease-out" style="width: 0%">
-                    <span id="progress-text">0%</span>
-                </div>
-            </div>
-
-            <!-- NEW: Completion Bar -->
-            <div id="completion-bar" class="hidden w-full bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg relative mb-4" role="alert">
-                <strong class="font-bold">เสร็จสิ้น!</strong>
-                <span class="block sm:inline">คุณอัปโหลดไฟล์ครบทุกหัวข้อในแบบฟอร์มแล้ว</span>
-            </div>
-
-            <!-- Error Message Box -->
-            <div id="error-message" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative mb-4" role="alert">
-                <strong class="font-bold">เกิดข้อผิดพลาด:</strong>
-                <span class="block sm:inline" id="error-text"></span>
+        <!-- Header and Sort Button Container -->
+        <div class="flex justify-between items-center mb-5">
+            <h1 class="text-2xl font-bold text-gray-800 text-left">
+                ระบบดึงข้อมูล ปพ.5 (รร.บ้านโคกเมือง)
+            </h1>
+            <div class="flex items-center space-x-2">
+                <span id="welcome-message" class="text-sm text-gray-600 font-medium self-center mr-2"></span>
+                <button id="reset-data-btn" class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200 text-sm shadow">
+                    ล้างข้อมูล
+                </button>
+                <button id="logout-btn" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200 text-sm shadow">
+                    ออกจากระบบ
+                </button>
             </div>
         </div>
-        <!-- === END NON-SCROLLING HEADER === -->
 
-        <!-- === SCROLLING RESULTS === -->
+
+        <!-- File Input -->
+        <div class="mb-6">
+            <label for="file-upload" class="block text-sm font-medium text-gray-700 mb-2">
+                อัปโหลดไฟล์ .xlsx (เลือกหลายไฟล์ได้):
+            </label>
+            <input type="file" id="file-upload" accept=".xlsx, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" 
+                   class="block w-full text-sm text-gray-600 rounded-lg border border-gray-300 cursor-pointer
+                          file:mr-4 file:py-2.5 file:px-5
+                          file:rounded-l-lg file:border-0
+                          file:text-sm file:font-semibold
+                          file:bg-blue-50 file:text-blue-700
+                          hover:file:bg-blue-100 transition-colors duration-200
+                          focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                   multiple>
+        </div>
+
+        <!-- Progress Status Text -->
+        <div id="progress-status" class="hidden text-sm font-medium text-gray-700 mb-2 text-center">
+            กำลังประมวลผล...
+        </div>
+        <!-- Progress Bar -->
+        <div id="progress-container" class="hidden w-full bg-gray-200 rounded-full h-4 mb-4">
+            <div id="progress-bar" class="bg-blue-600 h-4 rounded-full text-xs font-medium text-blue-100 text-center p-0.5 leading-none transition-all duration-300 ease-out" style="width: 0%">
+                <span id="progress-text">0%</span>
+            </div>
+        </div>
+
+        <!-- NEW: Completion Bar -->
+        <div id="completion-bar" class="hidden w-full bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg relative mb-4" role="alert">
+            <strong class="font-bold">เสร็จสิ้น!</strong>
+            <span class="block sm:inline">คุณอัปโหลดไฟล์ครบทุกหัวข้อในแบบฟอร์มแล้ว</span>
+        </div>
+
+        <!-- Error Message Box -->
+        <div id="error-message" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative mb-4" role="alert">
+            <strong class="font-bold">เกิดข้อผิดพลาด:</strong>
+            <span class="block sm:inline" id="error-text"></span>
+        </div>
+
         <!-- Results Section (Tabs) -->
-        <!-- MODIFIED: flex-1 flex flex-col min-h-0 -->
-        <div id="results" class="hidden flex-1 flex flex-col min-h-0">
+        <div id="results" class="hidden">
             <!-- NEW: Semester Info Display -->
-            <div id="semester-info" class="text-center text-lg font-semibold text-gray-700 mb-4 flex-shrink-0">
+            <div id="semester-info" class="text-center text-lg font-semibold text-gray-700 mb-4">
                 <!-- JS will populate this -->
             </div>
 
             <!-- Tab Headers -->
-            <div class="border-b border-gray-200 flex-shrink-0">
+            <div class="border-b border-gray-200">
                 <nav class="-mb-px flex space-x-4 md:space-x-6 overflow-x-auto" aria-label="Tabs">
                     <!-- Tab 1 Button -->
                     <button id="tab-btn-1" 
@@ -310,105 +204,71 @@
                             onclick="showTab(5)">
                         คะแนนสมรรถนะ
                     </button>
-                    <!-- --- MODIFIED: Tab 6 Button (Reverted to normal style) --- -->
-                    <button id="tab-btn-6" 
-                            class="tab-btn whitespace-nowrap py-3 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 font-medium text-sm transition-colors duration-200" 
-                            onclick="showTab(6)">
-                        ผลการเรียน
-                    </button>
                 </nav>
             </div>
 
             <!-- Tab Content -->
-            <!-- === MODIFIED: This div is now the non-scrolling flex container === -->
-            <div class="mt-4 flex-1 flex flex-col min-h-0">
+            <div class="mt-4">
                 
                 <!-- Tab 1: Scores Content -->
-                <!-- MODIFIED: Changed structure for sticky copy button -->
-                <div id="tab-content-1" class="tab-content flex-1 flex flex-col min-h-0">
-                    <div class="flex justify-end items-center mb-2 flex-shrink-0">
+                <div id="tab-content-1" class="tab-content">
+                    <div class="flex justify-end items-center mb-2">
                         <button id="copy-btn-1" 
                                 class="bg-green-500 hover:bg-green-600 text-white text-xs font-semibold py-1.5 px-3 rounded-lg transition-colors duration-200">
                             คัดลอก (เฉพาะข้อมูล)
                         </button>
                     </div>
-                    <!-- === MODIFIED: This div now scrolls === -->
-                    <div id="visual-scores" class="flex flex-row bg-white p-2 rounded-lg border border-gray-200 min-h-[250px] flex-1 overflow-auto"></div>
+                    <div id="visual-scores" class="flex flex-row overflow-auto bg-white p-2 rounded-lg border border-gray-200 min-h-[250px] max-h-[400px]"></div>
                     <pre id="output-scores" class="hidden"></pre>
                 </div>
 
                 <!-- Tab 2: RorMorSor Content -->
-                <!-- MODIFIED: Changed structure for sticky copy button -->
-                <div id="tab-content-2" class="tab-content hidden flex-1 flex flex-col min-h-0">
-                    <div class="flex justify-end items-center mb-2 flex-shrink-0">
+                <div id="tab-content-2" class="tab-content hidden">
+                    <div class="flex justify-end items-center mb-2">
                         <button id="copy-btn-2" 
                                 class="bg-green-500 hover:bg-green-600 text-white text-xs font-semibold py-1.5 px-3 rounded-lg transition-colors duration-200">
                             คัดลอก (เฉพาะข้อมูล)
                         </button>
                     </div>
-                    <!-- === MODIFIED: This div now scrolls === -->
-                    <div id="visual-rm" class="flex flex-row bg-white p-2 rounded-lg border border-gray-200 min-h-[250px] flex-1 overflow-auto"></div>
+                    <div id="visual-rm" class="flex flex-row overflow-auto bg-white p-2 rounded-lg border border-gray-200 min-h-[250px] max-h-[400px]"></div>
                     <pre id="output-rm" class="hidden"></pre>
                 </div>
                 
                 <!-- Tab 3: Reading Scores Content -->
-                <!-- MODIFIED: Changed structure for sticky copy button -->
-                <div id="tab-content-3" class="tab-content hidden flex-1 flex flex-col min-h-0">
-                    <div class="flex justify-end items-center mb-2 flex-shrink-0">
+                <div id="tab-content-3" class="tab-content hidden">
+                    <div class="flex justify-end items-center mb-2">
                         <button id="copy-btn-3" 
                                 class="bg-green-500 hover:bg-green-600 text-white text-xs font-semibold py-1.5 px-3 rounded-lg transition-colors duration-200">
                             คัดลอก (เฉพาะข้อมูล)
                         </button>
                     </div>
-                    <!-- === MODIFIED: This div now scrolls === -->
-                    <div id="visual-reading" class="flex flex-row bg-white p-2 rounded-lg border border-gray-200 min-h-[250px] flex-1 overflow-auto"></div>
+                    <div id="visual-reading" class="flex flex-row overflow-auto bg-white p-2 rounded-lg border border-gray-200 min-h-[250px] max-h-[400px]"></div>
                     <pre id="output-reading" class="hidden"></pre>
                 </div>
 
                 <!-- Tab 4: Attribute Scores Content -->
-                <!-- MODIFIED: Changed structure for sticky copy button -->
-                <div id="tab-content-4" class="tab-content hidden flex-1 flex flex-col min-h-0">
-                    <div class="flex justify-end items-center mb-2 flex-shrink-0">
+                <div id="tab-content-4" class="tab-content hidden">
+                    <div class="flex justify-end items-center mb-2">
                         <button id="copy-btn-4" 
                                 class="bg-green-500 hover:bg-green-600 text-white text-xs font-semibold py-1.5 px-3 rounded-lg transition-colors duration-200">
                             คัดลอก (เฉพาะข้อมูล)
                         </button>
                     </div>
-                    <!-- === MODIFIED: This div now scrolls === -->
-                    <div id="visual-attributes" class="flex flex-row bg-white p-2 rounded-lg border border-gray-200 min-h-[250px] flex-1 overflow-auto"></div>
+                    <div id="visual-attributes" class="flex flex-row overflow-auto bg-white p-2 rounded-lg border border-gray-200 min-h-[250px] max-h-[400px]"></div>
                     <pre id="output-attributes" class="hidden"></pre>
                 </div>
 
                 <!-- Tab 5: Competency Scores Content -->
-                <!-- MODIFIED: Changed structure for sticky copy button -->
-                <div id="tab-content-5" class="tab-content hidden flex-1 flex flex-col min-h-0">
-                    <div class="flex justify-end items-center mb-2 flex-shrink-0">
+                <div id="tab-content-5" class="tab-content hidden">
+                    <div class="flex justify-end items-center mb-2">
                         <button id="copy-btn-5" 
                                 class="bg-green-500 hover:bg-green-600 text-white text-xs font-semibold py-1.5 px-3 rounded-lg transition-colors duration-200">
                             คัดลอก (เฉพาะข้อมูล)
                         </button>
                     </div>
-                    <!-- === MODIFIED: This div now scrolls === -->
-                    <div id="visual-competency" class="flex flex-row bg-white p-2 rounded-lg border border-gray-200 min-h-[250px] flex-1 overflow-auto"></div>
+                    <div id="visual-competency" class="flex flex-row overflow-auto bg-white p-2 rounded-lg border border-gray-200 min-h-[250px] max-h-[400px]"></div>
                     <pre id="output-competency" class="hidden"></pre>
                 </div>
-
-                <!-- --- NEW: Tab 6 Content --- -->
-                <!-- MODIFIED: Changed structure for sticky copy button -->
-                <div id="tab-content-6" class="tab-content hidden flex-1 flex flex-col min-h-0">
-                    <div class="flex justify-end items-center mb-2 flex-shrink-0">
-                        <button id="copy-btn-6" 
-                                class="bg-green-500 hover:bg-green-600 text-white text-xs font-semibold py-1.5 px-3 rounded-lg transition-colors duration-200">
-                            คัดลอก (เฉพาะข้อมูล)
-                        </button>
-                    </div>
-                    <!-- === MODIFIED: This div now scrolls (overflow-scroll) === -->
-                    <div id="visual-individual" class="bg-white p-2 rounded-lg border border-gray-200 min-h-[250px] flex-1 overflow-scroll">
-                        <!-- JS will populate this table -->
-                    </div>
-                    <pre id="output-individual" class="hidden"></pre>
-                </div>
-
             </div>
         </div> <!-- End #results -->
 
